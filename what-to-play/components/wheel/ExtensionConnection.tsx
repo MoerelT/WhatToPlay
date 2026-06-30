@@ -104,7 +104,7 @@ export function ExtensionConnection() {
         <p>
           3. Ouvre l&apos;extension WhatToPlay depuis la barre d&apos;outils de
           ton navigateur. Utilise <strong>http://localhost:3000</strong> en
-          local ou <strong>https://what-to-play-lilac.vercel.app</strong> en
+          local ou <strong>https://what-to-play-wheel.vercel.app</strong> en
           production, colle le code dans <strong>Code de liaison</strong>,
           puis clique sur <strong>Enregistrer la liaison</strong>.
         </p>

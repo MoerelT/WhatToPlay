@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WhatToPlay Importer",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Importe les listes de jeux connectees vers WhatToPlay.",
   "permissions": [
     "activeTab",
@@ -12,7 +12,7 @@
     "http://localhost:3000/*",
     "http://127.0.0.1:3000/*",
     "https://moerelt.github.io/*",
-    "https://what-to-play-lilac.vercel.app/*",
+    "https://what-to-play-wheel.vercel.app/*",
     "https://api.steampowered.com/*",
     "https://store.steampowered.com/*",
     "https://retroachievements.org/*",

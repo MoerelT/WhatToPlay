@@ -19,7 +19,7 @@ l'environnement Production :
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `STEAM_API_KEY`
-- `APP_URL` avec la valeur `https://what-to-play-lilac.vercel.app`
+- `APP_URL` avec la valeur `https://what-to-play-wheel.vercel.app`
 - `SESSION_SECRET`
 
 Les valeurs existent deja dans le fichier local `.env.local`. Ne publie jamais
@@ -31,7 +31,7 @@ ce fichier et ne colle jamais les secrets dans GitHub.
 2. Sur le dernier deploiement, ouvre le menu `...`.
 3. Choisis **Redeploy**.
 4. Une fois le statut **Ready**, ouvre
-   `https://what-to-play-lilac.vercel.app/login`.
+   `https://what-to-play-wheel.vercel.app/login`.
 5. Teste la connexion Steam.
 
 Apres un changement de `APP_URL` ou d'une autre variable, effectue toujours un

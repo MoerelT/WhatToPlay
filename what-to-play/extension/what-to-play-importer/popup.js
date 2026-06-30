@@ -440,6 +440,6 @@ document.querySelector("#current-page").addEventListener("click", async () => {
 
 storageGet(["appUrl", "token"]).then((stored) => {
   appUrlInput.value =
-    stored.appUrl || "https://what-to-play-lilac.vercel.app";
+    stored.appUrl || "https://what-to-play-wheel.vercel.app";
   tokenInput.value = stored.token || "";
 });
