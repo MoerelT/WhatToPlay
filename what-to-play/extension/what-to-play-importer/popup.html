@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WhatToPlay Importer</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong>WhatToPlay</strong>
+        <span>Importer</span>
+      </header>
+
+      <label>
+        URL de l'application
+        <input id="app-url" type="url" value="http://localhost:3000">
+      </label>
+
+      <label>
+        Code de liaison
+        <input id="token" type="password" autocomplete="off">
+      </label>
+
+      <button id="save" class="secondary" type="button">
+        Enregistrer la liaison
+      </button>
+      <p class="hint">
+        Cette etape memorise seulement l'URL et le code. Choisis ensuite un
+        bouton ci-dessous pour importer les jeux.
+      </p>
+
+      <div class="actions">
+        <button id="steam-family" type="button">Importer Steam Family</button>
+        <p class="hint">
+          Ouvre l'onglet Bibliotheque de la page Gestion de la famille, clique
+          sur Afficher tout, puis laisse cet onglet actif pendant l'import.
+        </p>
+        <button id="current-page" type="button">
+          Importer la page RA / Instant Gaming
+        </button>
+      </div>
+
+      <p id="status" role="status"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

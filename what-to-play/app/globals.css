@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafaf8;
+  --foreground: #1c1917;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.completion-confetti {
+  position: absolute;
+  top: -8vh;
+  left: var(--confetti-left);
+  width: 10px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--confetti-color);
+  animation: completion-confetti-fall var(--confetti-duration) linear infinite;
+  animation-delay: var(--confetti-delay);
+}
+
+@keyframes completion-confetti-fall {
+  from {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+  }
+
+  to {
+    transform: translate3d(var(--confetti-drift), 120vh, 0) rotate(900deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .completion-confetti {
+    display: none;
+  }
+}

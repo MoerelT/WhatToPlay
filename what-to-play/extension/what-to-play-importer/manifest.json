@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "WhatToPlay Importer",
+  "version": "0.1.5",
+  "description": "Importe les listes de jeux connectees vers WhatToPlay.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*",
+    "https://moerelt.github.io/*",
+    "https://api.steampowered.com/*",
+    "https://store.steampowered.com/*",
+    "https://retroachievements.org/*",
+    "https://www.instant-gaming.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "WhatToPlay Importer"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "what-to-play-importer@local",
+      "strict_min_version": "109.0"
+    }
+  }
+}
