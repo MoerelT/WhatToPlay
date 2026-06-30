@@ -477,6 +477,7 @@ export async function getSlotState(profileId: string, wheel: WheelRow) {
 export async function getLibraryCandidates(
   profileId: string,
   validation: ValidationType = "achievements",
+  applySeriesRules = true,
 ) : Promise<WheelCandidate[]> {
   const library = await selectRows<LibraryEntryRow>("user_library_entries", {
     profile_id: `eq.${profileId}`,
@@ -545,7 +546,9 @@ export async function getLibraryCandidates(
       games: entry.games,
     }));
 
-  return keepFirstAvailableGamePerSeries(candidates, activeSeriesKeys);
+  return applySeriesRules
+    ? keepFirstAvailableGamePerSeries(candidates, activeSeriesKeys)
+    : candidates;
 }
 
 async function addGameToWheel(
@@ -750,7 +753,11 @@ export async function excludeLibraryGame(
   profileId: string,
   gameId: string,
 ) {
-  const candidates = await getLibraryCandidates(profileId, "achievements");
+  const candidates = await getLibraryCandidates(
+    profileId,
+    "achievements",
+    false,
+  );
   const candidate = candidates.find((entry) => entry.game_id === gameId);
 
   if (!candidate) {

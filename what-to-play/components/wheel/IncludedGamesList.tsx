@@ -17,14 +17,20 @@ type Candidate = {
 
 export function IncludedGamesList({
   candidates,
+  eligibleGameIds,
 }: {
   candidates: Candidate[];
+  eligibleGameIds: string[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [errorId, setErrorId] = useState<string | null>(null);
+  const eligibleIds = useMemo(
+    () => new Set(eligibleGameIds),
+    [eligibleGameIds],
+  );
   const visibleCandidates = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -58,10 +64,11 @@ export function IncludedGamesList({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-black text-stone-950">
-            Jeux inclus dans les tirages
+            Jeux inclus
           </h2>
           <p className="mt-1 text-sm text-stone-600">
-            {candidates.length} jeux actuellement admissibles.
+            {candidates.length} jeux detectes, dont {eligibleGameIds.length}{" "}
+            actuellement admissibles aux tirages.
           </p>
         </div>
         <label className="grid gap-1">
@@ -81,6 +88,7 @@ export function IncludedGamesList({
       <div className="grid max-h-[32rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
         {visibleCandidates.map((candidate) => {
           const metadata = candidate.games.metadata as GameMetadata;
+          const isEligible = eligibleIds.has(candidate.game_id);
 
           return (
             <article
@@ -111,6 +119,11 @@ export function IncludedGamesList({
                       ? "RetroAchievements"
                       : "bibliotheque Steam"}
                 </p>
+                {!isEligible ? (
+                  <p className="mt-1 text-xs font-bold text-amber-700">
+                    En attente dans l&apos;ordre de la serie
+                  </p>
+                ) : null}
                 {errorId === candidate.game_id ? (
                   <p className="mt-1 text-xs font-semibold text-red-700">
                     Exclusion impossible.

@@ -15,11 +15,13 @@ import { requireProfile } from "@/lib/auth/current-user";
 
 export default async function WheelPage() {
   const profile = await requireProfile();
-  const [wheel, candidates, excludedGames] = await Promise.all([
+  const [wheel, candidates, includedGames, excludedGames] = await Promise.all([
     getActiveWheel(profile.id),
     getLibraryCandidates(profile.id, "achievements"),
+    getLibraryCandidates(profile.id, "achievements", false),
     getExcludedGames(profile.id),
   ]);
+  const eligibleGameIds = candidates.map((candidate) => candidate.game_id);
 
   if (!wheel) {
     return (
@@ -39,7 +41,10 @@ export default async function WheelPage() {
           </div>
           <WheelSetup />
           <ExtensionConnection />
-          <IncludedGamesList candidates={candidates} />
+          <IncludedGamesList
+            candidates={includedGames}
+            eligibleGameIds={eligibleGameIds}
+          />
           <ExcludedGamesList games={excludedGames} />
         </section>
       </AppShell>
@@ -82,7 +87,10 @@ export default async function WheelPage() {
         </div>
         <div className="lg:col-span-2">
           <ExtensionConnection />
-          <IncludedGamesList candidates={candidates} />
+          <IncludedGamesList
+            candidates={includedGames}
+            eligibleGameIds={eligibleGameIds}
+          />
           <ExcludedGamesList games={excludedGames} />
         </div>
       </section>
