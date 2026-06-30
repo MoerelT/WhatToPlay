@@ -103,10 +103,10 @@ export function ExtensionConnection() {
         </p>
         <p>
           3. Ouvre l&apos;extension WhatToPlay depuis la barre d&apos;outils de
-          ton navigateur. Laisse l&apos;URL{" "}
-          <strong>http://localhost:3000</strong> pendant tes tests, colle le
-          code dans <strong>Code de liaison</strong>, puis clique sur{" "}
-          <strong>Enregistrer la liaison</strong>.
+          ton navigateur. Utilise <strong>http://localhost:3000</strong> en
+          local ou <strong>https://what-to-play-lilac.vercel.app</strong> en
+          production, colle le code dans <strong>Code de liaison</strong>,
+          puis clique sur <strong>Enregistrer la liaison</strong>.
         </p>
       </div>
 

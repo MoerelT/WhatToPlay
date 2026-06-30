@@ -439,6 +439,7 @@ document.querySelector("#current-page").addEventListener("click", async () => {
 });
 
 storageGet(["appUrl", "token"]).then((stored) => {
-  appUrlInput.value = stored.appUrl || "http://localhost:3000";
+  appUrlInput.value =
+    stored.appUrl || "https://what-to-play-lilac.vercel.app";
   tokenInput.value = stored.token || "";
 });
