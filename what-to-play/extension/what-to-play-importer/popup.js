@@ -266,36 +266,64 @@ async function readSteamFamilyFromStorePage() {
         .map(findScrollableAncestor)
         .filter(Boolean),
     );
-    let unchangedPasses = 0;
+
+    if (scrollContainers.size === 0 && document.scrollingElement) {
+      scrollContainers.add(document.scrollingElement);
+    }
+
+    const originalScrollPositions = new Map();
+
+    scrollContainers.forEach((scrollContainer) => {
+      originalScrollPositions.set(scrollContainer, scrollContainer.scrollTop);
+      scrollContainer.scrollTop = 0;
+    });
+
+    await sleep(300);
+    collectVisibleGames();
+
+    let completedPasses = 0;
     let previousSize = gamesByAppId.size;
 
-    for (let pass = 0; pass < 250 && unchangedPasses < 12; pass += 1) {
-      const rows = Array.from(document.querySelectorAll("[data-index]"));
-      const lastRow = rows.at(-1);
-
-      if (lastRow) {
-        lastRow.scrollIntoView({ block: "end" });
-      }
-
+    for (let pass = 0; pass < 300 && completedPasses < 8; pass += 1) {
       scrollContainers.forEach((scrollContainer) => {
-        scrollContainer.scrollTop += Math.max(
-          Math.floor(scrollContainer.clientHeight * 0.8),
+        const maximum = Math.max(
+          scrollContainer.scrollHeight - scrollContainer.clientHeight,
+          0,
+        );
+        const step = Math.max(
+          Math.floor(scrollContainer.clientHeight * 0.7),
           400,
+        );
+
+        scrollContainer.scrollTop = Math.min(
+          scrollContainer.scrollTop + step,
+          maximum,
         );
       });
 
-      await sleep(80);
+      await sleep(120);
       collectVisibleGames();
 
-      if (gamesByAppId.size === previousSize) {
-        unchangedPasses += 1;
+      const allAtBottom = Array.from(scrollContainers).every(
+        (scrollContainer) =>
+          scrollContainer.scrollTop + scrollContainer.clientHeight >=
+          scrollContainer.scrollHeight - 4,
+      );
+
+      if (allAtBottom && gamesByAppId.size === previousSize) {
+        completedPasses += 1;
       } else {
-        unchangedPasses = 0;
-        previousSize = gamesByAppId.size;
+        completedPasses = 0;
       }
+
+      previousSize = gamesByAppId.size;
     }
 
     const games = Array.from(gamesByAppId.values());
+
+    originalScrollPositions.forEach((scrollTop, scrollContainer) => {
+      scrollContainer.scrollTop = scrollTop;
+    });
 
     return { games };
   } catch (error) {
