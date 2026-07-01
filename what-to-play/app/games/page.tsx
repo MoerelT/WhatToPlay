@@ -1,5 +1,6 @@
 import { ExcludedGamesList } from "@/components/games/ExcludedGamesList";
 import { IncludedGamesList } from "@/components/games/IncludedGamesList";
+import { SteamGameAdder } from "@/components/games/SteamGameAdder";
 import { AppShell } from "@/components/layout/AppShell";
 import { requireProfile } from "@/lib/auth/current-user";
 import {
@@ -30,6 +31,8 @@ export default async function GamesPage() {
             la duree et la source utilisees par la roue sont visibles ici.
           </p>
         </div>
+
+        <SteamGameAdder />
 
         <div className="grid grid-cols-2 gap-3 sm:max-w-md">
           <Metric label="Inclus" value={includedGames.length} />

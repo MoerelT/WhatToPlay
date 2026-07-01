@@ -196,7 +196,14 @@ export async function getSteamStoreMetadata(appid: number) {
   }
 }
 
-export async function searchSteamStoreGame(gameName: string) {
+export type SteamStoreSearchResult = {
+  id: number;
+  name: string;
+  tiny_image?: string;
+  type?: string;
+};
+
+export async function searchSteamStoreGames(gameName: string, limit = 8) {
   try {
     const url = new URL("https://store.steampowered.com/api/storesearch");
     url.searchParams.set("term", gameName);
@@ -205,22 +212,27 @@ export async function searchSteamStoreGame(gameName: string) {
     const response = await fetch(url, { cache: "no-store" });
 
     if (!response.ok) {
-      return null;
+      return [];
     }
 
     const payload = (await response.json()) as {
-      items?: {
-        id: number;
-        name: string;
-        tiny_image?: string;
-        type?: string;
-      }[];
+      items?: SteamStoreSearchResult[];
     };
+    return (payload.items ?? [])
+      .filter((item) => item.type === "app")
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
+}
+
+export async function searchSteamStoreGame(gameName: string) {
+  try {
+    const games = await searchSteamStoreGames(gameName);
     const normalized = gameName
       .replace(/[^\p{L}\p{N}]+/gu, " ")
       .trim()
       .toLowerCase();
-    const games = (payload.items ?? []).filter((item) => item.type === "app");
 
     return (
       games.find(

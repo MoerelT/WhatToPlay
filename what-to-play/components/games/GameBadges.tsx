@@ -11,6 +11,7 @@ function categoryLabel(value: string | undefined) {
 function sourceLabel(source?: LibrarySource, catalogOrigin?: string) {
   if (catalogOrigin === "steam_family") return "Steam Family";
   if (catalogOrigin === "instant_gaming") return "Instant Gaming";
+  if (catalogOrigin === "manual_steam") return "Ajout manuel Steam";
   if (source === "steam_wishlist") return "Wishlist Steam";
   if (source === "retroachievements") return "RetroAchievements";
   return "Bibliotheque Steam";
