@@ -3,11 +3,14 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { GameBadges } from "@/components/games/GameBadges";
+import type { LibrarySource } from "@/lib/sources/types";
 import type { GameMetadata } from "@/types/game-metadata";
 
 type Candidate = {
+  catalog_origin?: string;
   game_id: string;
-  source?: "retroachievements" | "steam" | "steam_wishlist";
+  source?: LibrarySource;
   games: {
     header_url: string | null;
     metadata: Record<string, unknown>;
@@ -85,45 +88,38 @@ export function IncludedGamesList({
         </label>
       </div>
 
-      <div className="grid max-h-[32rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+      <div className="grid max-h-[42rem] gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
         {visibleCandidates.map((candidate) => {
           const metadata = candidate.games.metadata as GameMetadata;
           const isEligible = eligibleIds.has(candidate.game_id);
 
           return (
             <article
-              className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 shadow-sm"
+              className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 shadow-sm sm:grid-cols-[64px_minmax(0,1fr)_auto]"
               key={candidate.game_id}
             >
               {candidate.games.header_url ? (
                 <Image
                   alt=""
-                  className="h-14 w-14 rounded-md object-cover"
-                  height={56}
+                  className="h-16 w-16 rounded-md object-cover"
+                  height={64}
                   src={candidate.games.header_url}
-                  width={56}
+                  width={64}
                 />
               ) : (
-                <div className="h-14 w-14 rounded-md bg-stone-200" />
+                <div className="h-16 w-16 rounded-md bg-stone-200" />
               )}
               <div className="min-w-0">
                 <h3 className="truncate text-sm font-bold text-stone-950">
                   {candidate.games.name}
                 </h3>
-                <p className="mt-1 text-xs font-semibold text-stone-500">
-                  {metadata.duration_category ?? "duree inconnue"} |{" "}
-                  {metadata.difficulty_category ?? "difficulte inconnue"} |{" "}
-                  {candidate.source === "steam_wishlist"
-                    ? "wishlist Steam"
-                    : candidate.source === "retroachievements"
-                      ? "RetroAchievements"
-                      : "bibliotheque Steam"}
-                </p>
-                {!isEligible ? (
-                  <p className="mt-1 text-xs font-bold text-amber-700">
-                    En attente dans l&apos;ordre de la serie
-                  </p>
-                ) : null}
+                <GameBadges
+                  catalogOrigin={candidate.catalog_origin}
+                  eligible={isEligible}
+                  metadata={metadata}
+                  source={candidate.source}
+                  status="included"
+                />
                 {errorId === candidate.game_id ? (
                   <p className="mt-1 text-xs font-semibold text-red-700">
                     Exclusion impossible.
@@ -131,7 +127,7 @@ export function IncludedGamesList({
                 ) : null}
               </div>
               <button
-                className="min-h-9 rounded-md border border-red-300 px-3 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:border-stone-300 disabled:text-stone-400"
+                className="col-span-2 min-h-9 rounded-md border border-red-300 px-3 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:border-stone-300 disabled:text-stone-400 sm:col-span-1"
                 disabled={pendingId === candidate.game_id}
                 onClick={() => excludeGame(candidate.game_id)}
                 type="button"

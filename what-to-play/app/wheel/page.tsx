@@ -1,12 +1,9 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { ExcludedGamesList } from "@/components/wheel/ExcludedGamesList";
 import { ExtensionConnection } from "@/components/wheel/ExtensionConnection";
-import { IncludedGamesList } from "@/components/wheel/IncludedGamesList";
 import { WheelControls } from "@/components/wheel/WheelControls";
 import { WheelSetup } from "@/components/wheel/WheelSetup";
 import {
   getActiveWheel,
-  getExcludedGames,
   getLibraryCandidates,
   getSlotState,
   getWheelSelectionStrategy,
@@ -15,13 +12,10 @@ import { requireProfile } from "@/lib/auth/current-user";
 
 export default async function WheelPage() {
   const profile = await requireProfile();
-  const [wheel, candidates, includedGames, excludedGames] = await Promise.all([
+  const [wheel, candidates] = await Promise.all([
     getActiveWheel(profile.id),
     getLibraryCandidates(profile.id, "achievements"),
-    getLibraryCandidates(profile.id, "achievements", false),
-    getExcludedGames(profile.id),
   ]);
-  const eligibleGameIds = candidates.map((candidate) => candidate.game_id);
 
   if (!wheel) {
     return (
@@ -41,11 +35,6 @@ export default async function WheelPage() {
           </div>
           <WheelSetup />
           <ExtensionConnection />
-          <IncludedGamesList
-            candidates={includedGames}
-            eligibleGameIds={eligibleGameIds}
-          />
-          <ExcludedGamesList games={excludedGames} />
         </section>
       </AppShell>
     );
@@ -87,11 +76,6 @@ export default async function WheelPage() {
         </div>
         <div className="lg:col-span-2">
           <ExtensionConnection />
-          <IncludedGamesList
-            candidates={includedGames}
-            eligibleGameIds={eligibleGameIds}
-          />
-          <ExcludedGamesList games={excludedGames} />
         </div>
       </section>
     </AppShell>

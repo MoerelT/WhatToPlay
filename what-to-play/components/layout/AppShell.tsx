@@ -26,6 +26,12 @@ export function AppShell({
             </Link>
             <Link
               className="rounded-md px-3 py-2 text-sm font-bold text-stone-700 transition hover:bg-stone-100"
+              href="/games"
+            >
+              Jeux
+            </Link>
+            <Link
+              className="rounded-md px-3 py-2 text-sm font-bold text-stone-700 transition hover:bg-stone-100"
               href="/wheel"
             >
               Roue

@@ -23,6 +23,7 @@ export type GameRow = {
 };
 
 export type UserGameRow = {
+  catalog_origin?: string;
   id: string;
   profile_id: string;
   game_id: string;

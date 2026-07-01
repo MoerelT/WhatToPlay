@@ -29,6 +29,7 @@ type LibraryEntryRow = {
     achievements_completed?: boolean;
     achievement_total?: number;
     achievement_unlocked?: number;
+    catalog_origin?: string;
     has_community_visible_stats?: boolean;
   } | null;
   games: GameRow;
@@ -41,6 +42,7 @@ type ActiveGameRow = {
 };
 
 export type WheelCandidate = {
+  catalog_origin?: string;
   game_id: string;
   playtime_minutes: number;
   source: LibrarySource;
@@ -540,6 +542,7 @@ export async function getLibraryCandidates(
       );
     })
     .map((entry) => ({
+      catalog_origin: entry.raw_data?.catalog_origin,
       game_id: entry.game_id,
       playtime_minutes: entry.playtime_minutes,
       source: entry.source,
@@ -741,12 +744,54 @@ export async function excludeUserGame(
 }
 
 export async function getExcludedGames(profileId: string) {
-  return selectRows<UserGameRow>("user_games", {
+  const excluded = await selectRows<UserGameRow>("user_games", {
     profile_id: `eq.${profileId}`,
     status: "eq.abandoned",
     select: "*,games(*)",
     order: "updated_at.desc",
   });
+
+  if (excluded.length === 0) {
+    return excluded;
+  }
+
+  const libraryEntries = await selectRows<{
+    game_id: string;
+    raw_data: { catalog_origin?: string } | null;
+    source: LibrarySource;
+  }>("user_library_entries", {
+    profile_id: `eq.${profileId}`,
+    game_id: `in.(${excluded.map((entry) => entry.game_id).join(",")})`,
+    select: "game_id,source,raw_data",
+  });
+  const sourcePriority: Record<LibrarySource, number> = {
+    steam: 3,
+    steam_wishlist: 2,
+    retroachievements: 1,
+  };
+  const preferredByGame = new Map<
+    string,
+    { catalog_origin?: string; source: LibrarySource }
+  >();
+
+  for (const entry of libraryEntries) {
+    const current = preferredByGame.get(entry.game_id);
+
+    if (
+      !current ||
+      sourcePriority[entry.source] > sourcePriority[current.source]
+    ) {
+      preferredByGame.set(entry.game_id, {
+        catalog_origin: entry.raw_data?.catalog_origin,
+        source: entry.source,
+      });
+    }
+  }
+
+  return excluded.map((entry) => ({
+    ...entry,
+    ...preferredByGame.get(entry.game_id),
+  }));
 }
 
 export async function excludeLibraryGame(
