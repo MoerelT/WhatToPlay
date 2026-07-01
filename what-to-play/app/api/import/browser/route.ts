@@ -36,6 +36,12 @@ export function OPTIONS() {
 }
 
 export async function POST(request: NextRequest) {
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+
+  if (contentLength > 1_000_000) {
+    return json({ error: "Import payload too large" }, 413);
+  }
+
   const authorization = request.headers.get("authorization");
   const token = authorization?.startsWith("Bearer ")
     ? authorization.slice(7)
@@ -46,15 +52,25 @@ export async function POST(request: NextRequest) {
     return json({ error: "Invalid import token" }, 401);
   }
 
-  const body = (await request.json()) as {
+  let body: {
     games?: BrowserImportGame[];
     source?: BrowserImportSource;
   };
 
+  try {
+    body = (await request.json()) as {
+      games?: BrowserImportGame[];
+      source?: BrowserImportSource;
+    };
+  } catch {
+    return json({ error: "Invalid import payload" }, 400);
+  }
+
   if (
     !sources.has(body.source ?? "") ||
     !Array.isArray(body.games) ||
-    body.games.length === 0
+    body.games.length === 0 ||
+    body.games.length > 2000
   ) {
     return json({ error: "Invalid import payload" }, 400);
   }

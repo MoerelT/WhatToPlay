@@ -3,7 +3,8 @@ import { requireEnv } from "@/lib/env";
 type QueryParams = Record<string, string | number | boolean | undefined>;
 
 const supabaseUrl = () => requireEnv("NEXT_PUBLIC_SUPABASE_URL");
-const serviceRoleKey = () => requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const serviceRoleKey = () =>
+  process.env.SUPABASE_SECRET_KEY ?? requireEnv("SUPABASE_SERVICE_ROLE_KEY");
 
 function buildUrl(table: string, params: QueryParams = {}) {
   const url = new URL(`/rest/v1/${table}`, supabaseUrl());

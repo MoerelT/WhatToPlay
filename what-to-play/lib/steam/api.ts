@@ -9,14 +9,18 @@ const STEAM_API_BASE = "https://api.steampowered.com";
 
 async function steamFetch<T>(path: string, params: Record<string, string>) {
   const url = new URL(path, STEAM_API_BASE);
-  url.searchParams.set("key", requireEnv("STEAM_API_KEY"));
   url.searchParams.set("format", "json");
 
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      "x-webapi-key": requireEnv("STEAM_API_KEY"),
+    },
+  });
 
   if (!response.ok) {
     throw new Error(`Steam API failed with ${response.status}`);
