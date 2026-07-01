@@ -131,7 +131,7 @@ async function syncSteamGame(
       !metadata.duration_category ||
       !metadata.difficulty_category ||
       !metadata.challenge_tier ||
-      metadata.difficulty_model_version !== 2 ||
+      metadata.difficulty_model_version !== 3 ||
       !metadata.difficulty_source ||
       metadata.difficulty_source === "fallback" ||
       (metadata.hltb_source === "fallback" && !metadata.hltb_hours)
@@ -142,6 +142,7 @@ async function syncSteamGame(
       mapped.name,
       metadata,
       steamDifficultyScore,
+      steamGame.appid,
     );
   }
 

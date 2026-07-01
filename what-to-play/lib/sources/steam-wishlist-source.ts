@@ -89,13 +89,14 @@ export const steamWishlistSource: GameSourceAdapter = {
           !metadata.duration_category ||
           !metadata.difficulty_category ||
           !metadata.challenge_tier ||
-          metadata.difficulty_model_version !== 2
+          metadata.difficulty_model_version !== 3
         )
       ) {
         metadata = await enrichGameMetadata(
           gameName,
           metadata,
           achievements.difficultyScore,
+          item.appid,
         );
       }
 

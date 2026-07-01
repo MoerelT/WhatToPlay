@@ -187,13 +187,15 @@ async function importSteamMappedGame(
     (
       !currentMetadata.duration_category ||
       !currentMetadata.difficulty_category ||
-      !currentMetadata.challenge_tier
+      !currentMetadata.challenge_tier ||
+      currentMetadata.difficulty_model_version !== 3
     )
   ) {
     metadata = await enrichGameMetadata(
       gameName,
       currentMetadata,
       achievements.difficultyScore,
+      matched.id,
     );
 
     await updateRows<GameRow>(

@@ -46,7 +46,7 @@ export function GameBadges({
       <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-800">
         Duree {duration}
         {typeof metadata.hltb_hours === "number"
-          ? ` (${metadata.hltb_hours} h)`
+          ? ` (${Math.ceil(metadata.hltb_hours)} h)`
           : ""}
       </span>
       <span

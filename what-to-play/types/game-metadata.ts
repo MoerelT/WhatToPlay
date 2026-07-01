@@ -8,7 +8,12 @@ export type GameMetadata = {
   difficulty_category?: GameDifficultyCategory;
   difficulty_model_version?: number;
   difficulty_score?: number;
-  difficulty_source?: "psnprofiles" | "psthc" | "steam_achievements" | "fallback";
+  difficulty_source?:
+    | "psnprofiles"
+    | "psthc"
+    | "steamhunters"
+    | "steam_achievements"
+    | "fallback";
   duration_category?: GameDurationCategory;
   hltb_hours?: number;
   hltb_source?: "howlongtobeat" | "fallback";

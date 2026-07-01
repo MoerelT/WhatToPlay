@@ -10,6 +10,7 @@ const HLTB_REQUEST_TIMEOUT_MS = 8000;
 const HLTB_BASE_URL = "https://howlongtobeat.com";
 const HLTB_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36";
+const STEAM_HUNTERS_BASE_URL = "https://steamhunters.com/api";
 
 type HltbSearchState = {
   endpoint: string;
@@ -24,6 +25,12 @@ type HltbSearchResult = {
   comp_main?: number;
   comp_plus?: number;
   game_name?: string;
+};
+
+type SteamHuntersApp = {
+  playersPerfectedCount?: number;
+  playersStartedCount?: number;
+  tags?: { name?: string }[];
 };
 
 let hltbSearchStatePromise: Promise<HltbSearchState | null> | null = null;
@@ -299,7 +306,55 @@ async function fetchHowLongToBeat(gameName: string) {
     return null;
   }
 
-  return Math.round((seconds / 3600) * 10) / 10;
+  return Math.ceil(seconds / 3600);
+}
+
+async function fetchSteamHuntersDifficulty(appid: string | number) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${STEAM_HUNTERS_BASE_URL}/apps/${appid}`, {
+      cache: "no-store",
+      headers: { "User-Agent": "WhatToPlay/1.0" },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const app = (await response.json()) as SteamHuntersApp;
+    const started = Number(app.playersStartedCount);
+    const perfected = Number(app.playersPerfectedCount);
+
+    if (
+      !Number.isFinite(started) ||
+      !Number.isFinite(perfected) ||
+      started < 50 ||
+      perfected < 0
+    ) {
+      return null;
+    }
+
+    const completionRate = Math.max(0.1, (perfected / started) * 100);
+    const completionScore = Math.min(
+      10,
+      Math.max(1, 10 - 4 * Math.log10(completionRate)),
+    );
+    const isMarkedDifficult = (app.tags ?? []).some(
+      (tag) => tag.name?.toLowerCase() === "difficult",
+    );
+    const score = isMarkedDifficult
+      ? Math.max(7, completionScore)
+      : completionScore;
+
+    return Math.round(score * 10) / 10;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function fetchPsnProfilesDifficulty(gameName: string) {
@@ -336,6 +391,7 @@ export async function enrichGameMetadata(
   gameName: string,
   currentMetadata: Record<string, unknown>,
   steamDifficultyScore?: number | null,
+  steamAppId?: string | number,
 ): Promise<GameMetadata> {
   const metadata = currentMetadata as GameMetadata;
   let hours = metadata.hltb_hours;
@@ -348,41 +404,53 @@ export async function enrichGameMetadata(
     hltbSource = hours ? "howlongtobeat" : "fallback";
   }
 
+  if (hours) {
+    hours = Math.ceil(hours);
+    duration = durationCategory(hours);
+  }
+
   let difficultyScore = metadata.difficulty_score;
   let difficulty = metadata.difficulty_category;
   let difficultySource = metadata.difficulty_source;
-  const shouldRefreshSteamDifficulty =
-    steamDifficultyScore != null &&
-    metadata.difficulty_model_version !== 2;
+  const appid = steamAppId ?? metadata.steam_appid;
+  const shouldRefreshDifficulty = metadata.difficulty_model_version !== 3;
 
   if (
-    shouldRefreshSteamDifficulty ||
+    shouldRefreshDifficulty ||
     !difficultyScore ||
     !difficulty ||
     metadata.difficulty_source === "fallback"
   ) {
+    const steamHuntersScore = appid
+      ? await fetchSteamHuntersDifficulty(appid)
+      : null;
     const psnProfilesScore =
-      steamDifficultyScore == null
+      steamHuntersScore == null && steamDifficultyScore == null
         ? await fetchPsnProfilesDifficulty(gameName)
         : null;
     const psthcScore =
-      steamDifficultyScore == null && psnProfilesScore === null
+      steamHuntersScore == null &&
+      steamDifficultyScore == null &&
+      psnProfilesScore === null
         ? await fetchPsthcDifficulty(gameName)
         : null;
 
     difficultyScore =
+      steamHuntersScore ??
       steamDifficultyScore ??
       psnProfilesScore ??
       psthcScore ??
       undefined;
     difficulty = difficultyScore ? difficultyCategory(difficultyScore) : "medium";
-    difficultySource = steamDifficultyScore
-      ? "steam_achievements"
-      : psnProfilesScore
-        ? "psnprofiles"
-        : psthcScore
-          ? "psthc"
-          : "fallback";
+    difficultySource = steamHuntersScore
+      ? "steamhunters"
+      : steamDifficultyScore
+        ? "steam_achievements"
+        : psnProfilesScore
+          ? "psnprofiles"
+          : psthcScore
+            ? "psthc"
+            : "fallback";
   }
 
   return {
@@ -390,7 +458,7 @@ export async function enrichGameMetadata(
     challenge_tier: challengeTier(duration, difficulty),
     difficulty_category: difficulty,
     difficulty_model_version:
-      steamDifficultyScore != null ? 2 : metadata.difficulty_model_version,
+      difficultySource === "steamhunters" ? 3 : metadata.difficulty_model_version,
     difficulty_score: difficultyScore,
     difficulty_source: difficultySource,
     duration_category: duration,

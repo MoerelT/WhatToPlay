@@ -92,7 +92,7 @@ function GameCard({ entry }: { entry: UserGameRow }) {
                 </span>
                 <span className="rounded bg-emerald-100 px-2 py-1 text-emerald-900">
                   {metadata.hltb_hours
-                    ? `Duree ${metadata.duration_category ?? "medium"} (${metadata.hltb_hours}h)`
+                    ? `Duree ${metadata.duration_category ?? "medium"} (${Math.ceil(metadata.hltb_hours)}h)`
                     : "Duree inconnue"}
                 </span>
                 <span className="rounded bg-amber-100 px-2 py-1 text-amber-900">
