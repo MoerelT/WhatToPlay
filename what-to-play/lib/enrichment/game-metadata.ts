@@ -61,12 +61,12 @@ async function fetchText(url: string) {
   }
 }
 
-function durationCategory(hours: number): GameDurationCategory {
-  if (hours <= 12) {
+export function durationCategory(hours: number): GameDurationCategory {
+  if (hours < 40) {
     return "short";
   }
 
-  if (hours <= 30) {
+  if (hours < 80) {
     return "medium";
   }
 
@@ -82,12 +82,12 @@ function normalizeGameName(value: string) {
     .toLowerCase();
 }
 
-function difficultyCategory(score: number): GameDifficultyCategory {
-  if (score <= 3.5) {
+export function difficultyCategory(score: number): GameDifficultyCategory {
+  if (score < 4) {
     return "easy";
   }
 
-  if (score <= 6.5) {
+  if (score < 7) {
     return "medium";
   }
 
@@ -117,6 +117,24 @@ export function challengeTier(
   }
 
   return "medium";
+}
+
+export function getEffectiveGameMetadata(metadata: GameMetadata): GameMetadata {
+  const duration =
+    typeof metadata.hltb_hours === "number" && metadata.hltb_hours > 0
+      ? durationCategory(metadata.hltb_hours)
+      : (metadata.duration_category ?? "medium");
+  const difficulty =
+    typeof metadata.difficulty_score === "number"
+      ? difficultyCategory(metadata.difficulty_score)
+      : (metadata.difficulty_category ?? "medium");
+
+  return {
+    ...metadata,
+    challenge_tier: challengeTier(duration, difficulty),
+    difficulty_category: difficulty,
+    duration_category: duration,
+  };
 }
 
 async function discoverHltbEndpoint() {

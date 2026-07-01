@@ -4,6 +4,7 @@ import {
   keepFirstAvailableGamePerSeries,
 } from "@/lib/backlog/series";
 import { pickRandom } from "@/lib/backlog/wheel";
+import { getEffectiveGameMetadata } from "@/lib/enrichment/game-metadata";
 import {
   deleteRows,
   insertRows,
@@ -52,6 +53,10 @@ type WheelCandidateSelection = WheelCandidate & {
   assignedTier: GameChallengeTier;
 };
 
+function effectiveMetadata(game: GameRow) {
+  return getEffectiveGameMetadata(game.metadata as GameMetadata);
+}
+
 const tiers: GameChallengeTier[] = ["easy", "medium", "hard"];
 const strategyPattern =
   /\[strategy:(random|difficulty|duration|balanced)\]/;
@@ -73,7 +78,7 @@ function categoryScore(value: unknown) {
 }
 
 function strategyScore(candidate: WheelCandidate, strategy: WheelSelectionStrategy) {
-  const metadata = candidate.games.metadata as GameMetadata;
+  const metadata = effectiveMetadata(candidate.games);
 
   if (strategy === "difficulty") {
     return categoryScore(metadata.difficulty_category);
@@ -98,8 +103,8 @@ function replacementDistance(
   removedGame: GameRow,
   strategy: WheelSelectionStrategy,
 ) {
-  const candidateMetadata = candidate.games.metadata as GameMetadata;
-  const removedMetadata = removedGame.metadata as GameMetadata;
+  const candidateMetadata = effectiveMetadata(candidate.games);
+  const removedMetadata = effectiveMetadata(removedGame);
   const difficultyDistance = Math.abs(
     categoryScore(candidateMetadata.difficulty_category) -
       categoryScore(removedMetadata.difficulty_category),
@@ -155,9 +160,9 @@ function pickCompletionReplacementCandidate(
     return pickRandom(candidates);
   }
 
-  const completedMetadata = completedGame.metadata as GameMetadata;
+  const completedMetadata = effectiveMetadata(completedGame);
   const alternatives = candidates.filter((candidate) => {
-    const metadata = candidate.games.metadata as GameMetadata;
+    const metadata = effectiveMetadata(candidate.games);
 
     if (strategy === "difficulty") {
       return (
@@ -211,7 +216,7 @@ function assignRelativeTiers(
   const unclassified: WheelCandidate[] = [];
 
   for (const candidate of candidates) {
-    const metadata = candidate.games.metadata as GameMetadata;
+    const metadata = effectiveMetadata(candidate.games);
     const tier = metadata.challenge_tier;
     const hasReliableMetadata =
       metadata.difficulty_source &&
@@ -546,7 +551,10 @@ export async function getLibraryCandidates(
       game_id: entry.game_id,
       playtime_minutes: entry.playtime_minutes,
       source: entry.source,
-      games: entry.games,
+      games: {
+        ...entry.games,
+        metadata: effectiveMetadata(entry.games),
+      },
     }));
 
   return applySeriesRules
@@ -563,7 +571,7 @@ async function addGameToWheel(
   const assignedTier =
     "assignedTier" in candidate
       ? candidate.assignedTier
-      : ((candidate.games.metadata as GameMetadata).challenge_tier ?? "medium");
+      : (effectiveMetadata(candidate.games).challenge_tier ?? "medium");
   const metadata = {
     ...candidate.games.metadata,
     challenge_tier: assignedTier,
@@ -624,7 +632,7 @@ export async function spinWheel(profileId: string) {
       {
         ...selected,
         assignedTier:
-          ((selected.games.metadata as GameMetadata).challenge_tier ?? "medium"),
+          (effectiveMetadata(selected.games).challenge_tier ?? "medium"),
       },
     ),
   };
@@ -663,7 +671,7 @@ export async function selectWheelGame(
       {
         ...selected,
         assignedTier:
-          ((selected.games.metadata as GameMetadata).challenge_tier ?? "medium"),
+          (effectiveMetadata(selected.games).challenge_tier ?? "medium"),
       },
     ),
   };

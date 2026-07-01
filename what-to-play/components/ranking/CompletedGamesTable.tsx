@@ -4,6 +4,7 @@ import {
   formatPoints,
 } from "@/lib/ranking/scoring";
 import type { RankedCompletedGame } from "@/lib/ranking/queries";
+import { RemoveCompletionButton } from "@/components/ranking/RemoveCompletionButton";
 
 function categoryLabel(value: string) {
   if (value === "short" || value === "easy") return "Easy";
@@ -33,7 +34,7 @@ export function CompletedGamesTable({
         </p>
       ) : (
         <div className="overflow-x-auto border-y border-stone-200 bg-white">
-          <table className="w-full min-w-[860px] border-collapse text-left">
+          <table className="w-full min-w-[960px] border-collapse text-left">
             <thead>
               <tr className="border-b border-stone-200 text-xs font-bold uppercase text-stone-500">
                 <th className="px-4 py-3">Jeu</th>
@@ -42,6 +43,7 @@ export function CompletedGamesTable({
                 <th className="px-4 py-3">Duree</th>
                 <th className="px-4 py-3">Calcul</th>
                 <th className="px-4 py-3 text-right">Points</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -89,6 +91,18 @@ export function CompletedGamesTable({
                   </td>
                   <td className="px-4 py-3 text-right text-lg font-black text-emerald-700">
                     {formatPoints(game.points)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {game.source === "retroachievements" ? (
+                      <RemoveCompletionButton
+                        gameId={game.gameId}
+                        gameName={game.name}
+                      />
+                    ) : (
+                      <span className="text-xs font-semibold text-stone-400">
+                        Automatique
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

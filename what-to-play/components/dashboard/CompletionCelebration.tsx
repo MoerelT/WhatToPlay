@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, type CSSProperties } from "react";
+import { getEffectiveGameMetadata } from "@/lib/enrichment/game-metadata";
 import type { UserGameRow } from "@/types/database";
 import type { GameMetadata } from "@/types/game-metadata";
 
@@ -32,7 +33,9 @@ function imageUrl(game: UserGameRow) {
 }
 
 function gameMetadata(game: UserGameRow) {
-  return (game.games?.metadata ?? {}) as GameMetadata;
+  return getEffectiveGameMetadata(
+    (game.games?.metadata ?? {}) as GameMetadata,
+  );
 }
 
 export function CompletionCelebration({

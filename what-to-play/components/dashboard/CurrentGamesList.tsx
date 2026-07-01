@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ExcludeGameButton } from "@/components/dashboard/ExcludeGameButton";
 import { GameProgressActions } from "@/components/dashboard/GameProgressActions";
+import { getEffectiveGameMetadata } from "@/lib/enrichment/game-metadata";
 import type { UserGameRow } from "@/types/database";
 import type { GameChallengeTier, GameMetadata } from "@/types/game-metadata";
 
@@ -11,7 +12,9 @@ const tierLabels: Record<GameChallengeTier, string> = {
 };
 
 function getMetadata(entry: UserGameRow) {
-  return (entry.games?.metadata ?? {}) as GameMetadata;
+  return getEffectiveGameMetadata(
+    (entry.games?.metadata ?? {}) as GameMetadata,
+  );
 }
 
 function getTier(entry: UserGameRow): GameChallengeTier {

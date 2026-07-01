@@ -3,6 +3,7 @@ import type {
   GameDurationCategory,
   GameMetadata,
 } from "@/types/game-metadata";
+import { getEffectiveGameMetadata } from "@/lib/enrichment/game-metadata";
 
 const difficultyFallback: Record<GameDifficultyCategory, number> = {
   easy: 3,
@@ -17,8 +18,10 @@ const durationMultiplier: Record<GameDurationCategory, number> = {
 };
 
 export function getGameScore(metadata: GameMetadata) {
-  const difficultyCategory = metadata.difficulty_category ?? "medium";
-  const durationCategory = metadata.duration_category ?? "medium";
+  const effectiveMetadata = getEffectiveGameMetadata(metadata);
+  const difficultyCategory =
+    effectiveMetadata.difficulty_category ?? "medium";
+  const durationCategory = effectiveMetadata.duration_category ?? "medium";
   const difficulty = Math.min(
     10,
     Math.max(

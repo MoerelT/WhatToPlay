@@ -1,4 +1,5 @@
 import type { LibrarySource } from "@/lib/sources/types";
+import { getEffectiveGameMetadata } from "@/lib/enrichment/game-metadata";
 import type { GameMetadata } from "@/types/game-metadata";
 
 function categoryLabel(value: string | undefined) {
@@ -30,8 +31,9 @@ export function GameBadges({
   source?: LibrarySource;
   status: "excluded" | "included";
 }) {
-  const difficulty = categoryLabel(metadata.difficulty_category);
-  const duration = categoryLabel(metadata.duration_category);
+  const effectiveMetadata = getEffectiveGameMetadata(metadata);
+  const difficulty = categoryLabel(effectiveMetadata.difficulty_category);
+  const duration = categoryLabel(effectiveMetadata.duration_category);
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-bold uppercase">

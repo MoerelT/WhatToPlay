@@ -1,5 +1,9 @@
 import { getGameScore } from "@/lib/ranking/scoring";
-import { selectRows } from "@/lib/supabase/rest";
+import {
+  deleteRows,
+  selectRows,
+  updateRows,
+} from "@/lib/supabase/rest";
 import type { GameRow, ProfileRow } from "@/types/database";
 import type { GameMetadata } from "@/types/game-metadata";
 
@@ -143,4 +147,53 @@ export async function getRankingData(currentProfileId: string) {
     currentGames: sortRankedGames(currentGames),
     leaderboard,
   };
+}
+
+export async function removeRetroAchievementsCompletion(
+  profileId: string,
+  gameId: string,
+) {
+  const entries = await selectRows<{
+    raw_data: {
+      achievement_total?: number;
+      achievement_unlocked?: number;
+      achievements_completed?: boolean;
+    };
+  }>("user_library_entries", {
+    profile_id: `eq.${profileId}`,
+    game_id: `eq.${gameId}`,
+    source: "eq.retroachievements",
+    "raw_data->>achievements_completed": "eq.true",
+    select: "raw_data",
+    limit: 1,
+  });
+  const entry = entries[0];
+
+  if (!entry) {
+    return false;
+  }
+
+  await updateRows(
+    "user_library_entries",
+    {
+      raw_data: {
+        ...entry.raw_data,
+        achievement_unlocked: 0,
+        achievements_completed: false,
+      },
+    },
+    {
+      profile_id: `eq.${profileId}`,
+      game_id: `eq.${gameId}`,
+      source: "eq.retroachievements",
+    },
+  );
+  await deleteRows("user_games", {
+    profile_id: `eq.${profileId}`,
+    game_id: `eq.${gameId}`,
+    status: "eq.achievements_completed",
+    validation: "eq.achievements",
+  });
+
+  return true;
 }
